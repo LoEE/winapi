@@ -2567,6 +2567,7 @@ static int l_create_reg_key(lua_State *L) {
 
 #line 2005 "winapi.l.c"
 static const char *lua_code_block = ""\
+  "local winapi = ...\n"\
   "function winapi.execute(cmd,unicode)\n"\
   "  local comspec = os.getenv('COMSPEC')\n"\
   "  if unicode ~= 'unicode' then\n"\
@@ -2639,7 +2640,9 @@ static const char *lua_code_block = ""\
   "function winapi.dirs(mask,subdirs) return winapi.files(mask,subdirs,'D') end\n"\
 ;
 static void load_lua_code (lua_State *L) {
-  luaL_dostring(L,lua_code_block);
+  luaL_loadstring(L, lua_code_block);
+  lua_pushvalue(L, -2);
+  lua_pcall(L, 1, LUA_MULTRET, 0);
 }
 
 
@@ -2824,10 +2827,9 @@ EXPORT int luaopen_winapi (lua_State *L) {
 #if LUA_VERSION_NUM > 501
     lua_newtable(L);
     luaL_setfuncs (L,winapi_funs,0);
-    lua_pushvalue(L,-1);
-    lua_setglobal(L,"winapi");
 #else
-    luaL_register(L,"winapi",winapi_funs);
+    lua_newtable (L);
+    luaL_register(L,NULL,winapi_funs);
 #endif
     Window_register(L);
 Event_register(L);
